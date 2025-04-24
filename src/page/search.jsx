@@ -1,14 +1,33 @@
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { data } from "../assets/data/data";
 import { getRegExp } from "korean-regexp";
+import { useEffect, useRef, useState } from "react";
 
 function Search() {
   const [searchParms] = useSearchParams();
+  const [filteredData, setFilteredData] = useState(data);
   const params = searchParms.get("animal");
   const reg = getRegExp(params);
-  console.log(useLocation().search);
 
-  const filteredData = data.filter((el) => el.name.match(reg));
+  // useEffect(() => { // debounce
+  //   const debounceTimeer = setTimeout(() => {
+  //     const newfilteredData = data.filter((el) => el.name.match(reg));
+  //     setFilteredData(newfilteredData);
+  //   }, 1000);
+  //   return () => clearTimeout(debounceTimeer);
+  // }, [params]);
+  // const time = useRef(new Date());
+
+  useEffect(() => {
+    //throttle
+    const newTime = new Date();
+    const debounceTimeer = setTimeout(() => {
+      const newfilteredData = data.filter((el) => el.name.match(reg));
+      setFilteredData(newfilteredData);
+      time.current = new Date();
+    }, 1000 - (newTime - time.current));
+    return () => clearTimeout(debounceTimeer);
+  }, [params]);
 
   return (
     <ul>
